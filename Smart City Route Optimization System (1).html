@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart City Route Optimization System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f8f6;--card:#fff;--ink:#12302e;--mute:#58716e;--line:#d3e3df;--blue:#0f8b7d;--orange:#e8590c;--green:#2f9e44;--red:#d6336c;--edge:#a9bfba;--chip:#e3f4f0;--head:#0b3d3a;--headink:#fff;--onblue:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1d1b;--card:#112b28;--ink:#e6f4f1;--mute:#8fb0aa;--line:#1f423d;--edge:#4f7570;--chip:#18403a;--head:#04100f;--blue:#2ec4b0;--orange:#ff922b;--green:#69db7c;--red:#f06595;--onblue:#04201c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a1d1b;--card:#112b28;--ink:#e6f4f1;--mute:#8fb0aa;--line:#1f423d;--edge:#4f7570;--chip:#18403a;--head:#04100f;--blue:#2ec4b0;--orange:#ff922b;--green:#69db7c;--red:#f06595;--onblue:#04201c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(135deg,var(--head),var(--blue));color:var(--headink);padding:20px 16px;text-align:center}
+header h1{margin:0;font-size:1.5rem;letter-spacing:.2px}
+header p{margin:4px 0 0;font-size:.85rem;opacity:.8}
+.wrap{max-width:1040px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--blue);border-color:var(--blue);color:var(--onblue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.grid{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.side{flex:1 1 270px;max-width:100%}
+.main{flex:3 1 380px;min-width:0}
+label{display:block;font-size:.8rem;color:var(--mute);margin:10px 0 3px}
+select,input[type=text]{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.radios{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.radios label{display:flex;align-items:center;gap:5px;margin:0;color:var(--ink);font-size:.9rem}
+.go{margin-top:14px;width:100%;padding:11px;border:0;border-radius:8px;background:var(--blue);color:var(--onblue);font:inherit;font-weight:700;cursor:pointer}
+.go:hover{filter:brightness(1.1)}
+.hint{font-size:.78rem;color:var(--mute);margin-top:8px}
+.res{margin-top:12px;display:grid;gap:8px}
+.r{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--bg)}
+.r h3{margin:0 0 4px;font-size:.9rem;color:var(--blue)}
+.route{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:4px 0}
+.chip{background:var(--chip);border-radius:99px;padding:2px 9px;font-size:.8rem}
+.arrow{color:var(--mute)}
+.meta{font-size:.82rem;color:var(--mute)}
+svg{width:100%;height:auto;display:block}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+th{background:var(--head);color:var(--headink)}
+.ok{color:var(--green);font-weight:600;font-size:.85rem;margin-top:8px}
+.err{color:var(--red);font-size:.85rem;margin-top:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row input{flex:1 1 240px;width:auto}
+.row .go{margin:0;width:auto;padding:9px 18px}
+footer{text-align:center;color:var(--mute);font-size:.78rem;padding:14px}
+h1,h3,.tabs button,.go,th,svg text{font-family:"Space Grotesk","DM Sans",system-ui,sans-serif}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><h1>Smart City Route Optimization System</h1><p>Dijkstra’s and Bellman-Ford shortest-path algorithms, running in your browser</p></header>
+<div class="wrap">
+<div class="tabs"><button id="t1" class="on">Find Route</button><button id="t2">Benchmark</button></div>
+
+<section id="p1" class="grid">
+ <div class="card side">
+  <label for="src">From</label><select id="src"></select>
+  <label for="dst">To</label><select id="dst"></select>
+  <label>Algorithm</label>
+  <div class="radios">
+   <label><input type="radio" name="al" value="Dijkstra">Dijkstra</label>
+   <label><input type="radio" name="al" value="Bellman-Ford">Bellman-Ford</label>
+   <label><input type="radio" name="al" value="Both" checked>Both</label>
+  </div>
+  <button class="go" id="go">Find shortest route</button>
+  <div class="hint">Tip: you can also click two locations on the map.</div>
+  <div class="res" id="res"></div>
+ </div>
+ <div class="card main"><svg id="map" viewBox="0 0 700 420" role="img" aria-label="City map"></svg></div>
+</section>
+
+<section id="p2" hidden>
+ <div class="card">
+  <label for="sizes">Graph sizes (number of locations, separated by spaces)</label>
+  <div class="row"><input type="text" id="sizes" value="50 100 200 500 1000 2000"><button class="go" id="run">Run benchmark</button></div>
+  <div class="err" id="err"></div>
+  <div class="scroll" style="margin-top:12px"><table id="tbl" hidden><thead><tr><th>Locations (V)</th><th>Roads (E)</th><th>Dijkstra (ms)</th><th>Bellman-Ford (ms)</th><th>Slower by</th></tr></thead><tbody></tbody></table></div>
+  <div class="ok" id="ok"></div>
+  <div class="scroll"><svg id="chart" viewBox="0 0 700 320" hidden></svg></div>
+ </div>
+</section>
+</div>
+<footer>BCA (AI &amp; DS) project · Design and Analysis of Algorithms · Krish Gadwani (2401201218)</footer>
+
+<script>
+const ROADS=[["Airport","Central Station",12],["Airport","Tech Park",9],["Central Station","City Mall",3],["Central Station","Hospital",5],["Central Station","Old Town",4],["Tech Park","University",6],["Tech Park","Stadium",8],["University","Hospital",4],["University","Stadium",3],["City Mall","Old Town",2],["City Mall","Harbor",7],["Hospital","Harbor",6],["Old Town","Harbor",5],["Stadium","Harbor",10]];
+const POS={"Airport":[60,200],"Tech Park":[200,70],"University":[340,70],"Stadium":[500,70],"Central Station":[200,250],"Hospital":[360,170],"City Mall":[270,355],"Old Town":[440,300],"Harbor":[630,240]};
+
+/* ---------- graph + algorithms (same logic as the Python project) ---------- */
+function makeGraph(){return{adj:new Map(),edges:[]}}
+function addEdge(g,u,v,w){for(const x of[u,v])if(!g.adj.has(x))g.adj.set(x,[]);g.adj.get(u).push([v,w]);g.adj.get(v).push([u,w]);g.edges.push([u,v,w],[v,u,w])}
+function cityGraph(){const g=makeGraph();ROADS.forEach(r=>addEdge(g,...r));return g}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function randomGraph(n,deg=4,maxW=100,seed=42){
+ const R=rng(seed),g=makeGraph(),ex=new Set(),ri=k=>Math.floor(R()*k);
+ for(let v=0;v<n;v++)g.adj.set(v,[]);
+ for(let v=1;v<n;v++){const u=ri(v);addEdge(g,u,v,1+ri(maxW));ex.add(Math.min(u,v)*n+Math.max(u,v))}
+ const target=Math.max(n-1,Math.floor(n*deg/2)),cap=n*(n-1)/2;
+ while(ex.size<target&&ex.size<cap){const u=ri(n),v=ri(n);if(u===v)continue;const k=Math.min(u,v)*n+Math.max(u,v);if(!ex.has(k)){ex.add(k);addEdge(g,u,v,1+ri(maxW))}}
+ return g}
+class Heap{constructor(){this.a=[]}
+ push(x){const a=this.a;a.push(x);let i=a.length-1;while(i>0){const p=(i-1)>>1;if(a[p][0]<=a[i][0])break;[a[p],a[i]]=[a[i],a[p]];i=p}}
+ pop(){const a=this.a,top=a[0],last=a.pop();if(a.length){a[0]=last;let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<a.length&&a[l][0]<a[m][0])m=l;if(r<a.length&&a[r][0]<a[m][0])m=r;if(m===i)break;[a[m],a[i]]=[a[i],a[m]];i=m}}return top}
+ get size(){return this.a.length}}
+function dijkstra(g,s){
+ const dist=new Map(),prev=new Map();for(const v of g.adj.keys()){dist.set(v,Infinity);prev.set(v,null)}
+ dist.set(s,0);const h=new Heap();h.push([0,s]);
+ while(h.size){const[d,u]=h.pop();if(d>dist.get(u))continue;
+  for(const[v,w]of g.adj.get(u)){const nd=d+w;if(nd<dist.get(v)){dist.set(v,nd);prev.set(v,u);h.push([nd,v])}}}
+ return{dist,prev}}
+function bellmanFord(g,s){
+ const dist=new Map(),prev=new Map();for(const v of g.adj.keys()){dist.set(v,Infinity);prev.set(v,null)}
+ dist.set(s,0);
+ for(let i=0;i<g.adj.size-1;i++){let ch=false;
+  for(const[u,v,w]of g.edges){const du=dist.get(u);if(du!==Infinity&&du+w<dist.get(v)){dist.set(v,du+w);prev.set(v,u);ch=true}}
+  if(!ch)break}
+ return{dist,prev}}
+function pathOf(prev,s,t){const p=[];let c=t;while(c!==null&&c!==undefined){p.push(c);c=prev.get(c)}p.reverse();return p[0]===s?p:[]}
+function avgMs(fn,g,reps){const t=performance.now();for(let i=0;i<reps;i++)fn(g,g.adj.keys().next().value);return(performance.now()-t)/reps}
+
+/* ---------- route tab ---------- */
+const city=cityGraph(),names=[...city.adj.keys()].sort();
+const $=id=>document.getElementById(id),src=$("src"),dst=$("dst");
+names.forEach(n=>{src.add(new Option(n,n));dst.add(new Option(n,n))});
+src.value="Airport";dst.value="Harbor";
+let pick=null;
+function drawMap(path){
+ const hot=new Set();if(path)for(let i=0;i<path.length-1;i++){hot.add(path[i]+"|"+path[i+1]);hot.add(path[i+1]+"|"+path[i])}
+ const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+ let s="";
+ for(const[u,v,w]of ROADS){const[x1,y1]=POS[u],[x2,y2]=POS[v],h=hot.has(u+"|"+v),mx=(x1+x2)/2,my=(y1+y2)/2;
+  s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${h?css("--orange"):css("--edge")}" stroke-width="${h?5:2.5}" stroke-linecap="round"/>`;
+  s+=`<rect x="${mx-12}" y="${my-9}" width="24" height="18" rx="4" fill="${css("--card")}"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11" fill="${css("--mute")}">${w}</text>`}
+ for(const n of names){const[x,y]=POS[n];
+  const c=path&&path.length&&n===path[0]?css("--green"):path&&path.length&&n===path[path.length-1]?css("--red"):css("--blue");
+  s+=`<g data-n="${n}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="16" fill="${c}" stroke="${css("--card")}" stroke-width="3"/><text x="${x}" y="${y+34}" text-anchor="middle" font-size="13" font-weight="700" fill="${css("--ink")}">${n}</text></g>`}
+ $("map").innerHTML=s}
+$("map").addEventListener("click",e=>{const g=e.target.closest("[data-n]");if(!g)return;const n=g.dataset.n;
+ if(pick===null){pick=n;src.value=n;drawMap([n])}else{if(n!==pick){dst.value=n;pick=null;find()}else{pick=null;drawMap()}}});
+function find(){
+ const s=src.value,d=dst.value,res=$("res");pick=null;
+ if(s===d){res.innerHTML='<div class="r"><div class="meta">Please choose two different locations.</div></div>';drawMap();return}
+ const al=document.querySelector("input[name=al]:checked").value,fns={"Dijkstra":dijkstra,"Bellman-Ford":bellmanFord};
+ let html="",path=[];
+ for(const name of(al==="Both"?["Dijkstra","Bellman-Ford"]:[al])){
+  const reps=300,t=performance.now();let r;for(let i=0;i<reps;i++)r=fns[name](city,s);
+  const us=(performance.now()-t)/reps*1000;path=pathOf(r.prev,s,d);
+  html+=`<div class="r"><h3>${name}</h3><div class="route">${path.map(p=>`<span class="chip">${p}</span>`).join('<span class="arrow">→</span>')}</div><div class="meta"><b>${r.dist.get(d)} km</b> · ${path.length} stops · ${us.toFixed(1)} µs</div></div>`}
+ res.innerHTML=html;drawMap(path)}
+$("go").onclick=find;
+find();
+
+/* ---------- benchmark tab ---------- */
+function runBench(){
+ const err=$("err");err.textContent="";
+ const sizes=[...new Set($("sizes").value.trim().split(/\s+/).map(Number))].sort((a,b)=>a-b);
+ if(!sizes.length||sizes.some(n=>!Number.isInteger(n)||n<2||n>5000)){err.textContent="Enter whole numbers between 2 and 5000, separated by spaces.";return}
+ const rows=[];let same=true;
+ for(const n of sizes){const g=randomGraph(n),reps=Math.max(2,Math.round(3000/n));
+  const a=dijkstra(g,0).dist,b=bellmanFord(g,0).dist;for(const[k,v]of a)if(b.get(k)!==v)same=false;
+  let d=Infinity,bf=Infinity;for(let i=0;i<3;i++){d=Math.min(d,avgMs(dijkstra,g,reps));bf=Math.min(bf,avgMs(bellmanFord,g,reps))}
+  rows.push([n,g.edges.length/2,d,bf])}
+ $("tbl").hidden=false;
+ $("tbl").tBodies[0].innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2].toFixed(3)}</td><td>${r[3].toFixed(3)}</td><td>${(r[3]/r[2]).toFixed(1)}x</td></tr>`).join("");
+ $("ok").textContent=same?"✓ Both algorithms returned identical distances on every graph.":"✗ Distances differed.";
+ $("ok").className=same?"ok":"err";
+ chart(rows)}
+function chart(rows){
+ const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+ const W=700,H=320,l=60,r=24,t=24,b=50,xm=Math.max(...rows.map(x=>x[0])),ym=Math.max(...rows.map(x=>x[3]))*1.1;
+ const px=v=>l+(W-l-r)*v/xm,py=v=>H-b-(H-b-t)*v/ym,ink=css("--mute");
+ let s=`<line x1="${l}" y1="${t}" x2="${l}" y2="${H-b}" stroke="${ink}"/><line x1="${l}" y1="${H-b}" x2="${W-r}" y2="${H-b}" stroke="${ink}"/>`;
+ for(let i=0;i<=4;i++){const v=ym*i/4;s+=`<line x1="${l}" y1="${py(v)}" x2="${W-r}" y2="${py(v)}" stroke="${css("--line")}"/><text x="${l-8}" y="${py(v)+4}" text-anchor="end" font-size="11" fill="${ink}">${v.toFixed(1)}</text>`}
+ rows.forEach(x=>s+=`<text x="${px(x[0])}" y="${H-b+16}" text-anchor="middle" font-size="11" fill="${ink}">${x[0]}</text>`);
+ s+=`<text x="${(l+W-r)/2}" y="${H-8}" text-anchor="middle" font-size="12" fill="${ink}">Number of locations (V)</text><text x="14" y="${(t+H-b)/2}" font-size="12" fill="${ink}" transform="rotate(-90 14 ${(t+H-b)/2})" text-anchor="middle">Time (ms)</text>`;
+ [[2,"--blue","Dijkstra"],[3,"--orange","Bellman-Ford"]].forEach(([i,c,lab],k)=>{const col=css(c);
+  s+=`<polyline fill="none" stroke="${col}" stroke-width="2.5" points="${rows.map(x=>px(x[0])+","+py(x[i])).join(" ")}"/>`;
+  rows.forEach(x=>s+=`<circle cx="${px(x[0])}" cy="${py(x[i])}" r="4" fill="${col}"/>`);
+  s+=`<rect x="${l+14}" y="${t+k*18}" width="12" height="12" fill="${col}"/><text x="${l+32}" y="${t+10+k*18}" font-size="12" fill="${css("--ink")}">${lab}</text>`});
+ $("chart").innerHTML=s;$("chart").hidden=false}
+$("run").onclick=runBench;
+
+/* ---------- tabs + theme ---------- */
+function show(n){$("p1").hidden=n!==1;$("p2").hidden=n!==2;$("t1").classList.toggle("on",n===1);$("t2").classList.toggle("on",n===2);if(n===2&&$("tbl").hidden)runBench()}
+$("t1").onclick=()=>show(1);$("t2").onclick=()=>show(2);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{find();if(!$("chart").hidden)runBench()});
+</script>
+</body>
+</html>
